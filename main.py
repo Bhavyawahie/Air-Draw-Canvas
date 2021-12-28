@@ -1,1 +1,0 @@
-import ny from numpy
