@@ -21,11 +21,10 @@ print(len(overlayList))
 header = overlayList[0]
 drawColor = (255, 0, 255)
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 cap.set(3, 1280)
 cap.set(4, 720)
-
-detector = htm.handDetector(detectionCon=0.65,maxHands=1)
+detector = htm.handDetector(detectionCon=0.85,maxHands=1)
 xp, yp = 0, 0
 imgCanvas = np.zeros((720, 1280, 3), np.uint8)
 
@@ -33,11 +32,12 @@ while True:
 
     # 1. Import image
     success, img = cap.read()
+    img = cv2.resize(img, (1280, 720))
     img = cv2.flip(img, 1)
 
     # 2. Find Hand Landmarks
     img = detector.findHands(img)
-    lmList = detector.findPosition(img, draw=False)
+    lmList = detector.findPosition(img, draw=True)
 
     if len(lmList) != 0:
 
@@ -53,7 +53,7 @@ while True:
 
         # 4. If Selection Mode - Two finger are up
         if fingers[1] and fingers[2]:
-            # xp, yp = 0, 0
+            xp, yp = 0, 0
             print("Selection Mode")
             # # Checking for the click
             if y1 < 125:
@@ -80,13 +80,13 @@ while True:
 
             cv2.line(img, (xp, yp), (x1, y1), drawColor, brushThickness)
 
-            # if drawColor == (0, 0, 0):
-            #     cv2.line(img, (xp, yp), (x1, y1), drawColor, eraserThickness)
-            #     cv2.line(imgCanvas, (xp, yp), (x1, y1), drawColor, eraserThickness)
-            #
-            # else:
-            #     cv2.line(img, (xp, yp), (x1, y1), drawColor, brushThickness)
-            #     cv2.line(imgCanvas, (xp, yp), (x1, y1), drawColor, brushThickness)
+            if drawColor == (0, 0, 0):
+                cv2.line(img, (xp, yp), (x1, y1), drawColor, eraserThickness)
+                cv2.line(imgCanvas, (xp, yp), (x1, y1), drawColor, eraserThickness)
+
+            else:
+                cv2.line(img, (xp, yp), (x1, y1), drawColor, brushThickness)
+                cv2.line(imgCanvas, (xp, yp), (x1, y1), drawColor, brushThickness)
 
             xp, yp = x1, y1
 
@@ -104,7 +104,7 @@ while True:
 
     # Setting the header image
     img[0:125, 0:1280] = header
-    # img = cv2.addWeighted(img,0.5,imgCanvas,0.5,0)
+    img = cv2.addWeighted(img,0.5,imgCanvas,0.5,0)
     cv2.imshow("Image", img)
     cv2.imshow("Canvas", imgCanvas)
     cv2.imshow("Inv", imgInv)
